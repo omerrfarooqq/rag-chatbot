@@ -1,32 +1,53 @@
 const API_BASE = 'http://localhost:8000'
 
+async function parseError(res) {
+  try {
+    const data = await res.json()
+    return data.detail || JSON.stringify(data)
+  } catch {
+    try {
+      return await res.text()
+    } catch {
+      return `HTTP ${res.status}`
+    }
+  }
+}
+
+async function request(path, options = {}) {
+  let res
+  try {
+    res = await fetch(`${API_BASE}${path}`, options)
+  } catch (e) {
+    throw new Error(
+      `Cannot reach backend at ${API_BASE}. Is uvicorn running on port 8000? (${e.message})`
+    )
+  }
+  if (!res.ok) {
+    const msg = await parseError(res)
+    throw new Error(`[${res.status}] ${msg}`)
+  }
+  return res.json()
+}
+
 export async function uploadFiles(sessionId, files) {
   const fd = new FormData()
   fd.append('session_id', sessionId)
   for (const f of files) fd.append('files', f)
-  const res = await fetch(`${API_BASE}/upload`, { method: 'POST', body: fd })
-  if (!res.ok) throw new Error((await res.json()).detail || 'Upload failed')
-  return res.json()
+  return request('/upload', { method: 'POST', body: fd })
 }
 
 export async function sendChat(sessionId, question) {
-  const res = await fetch(`${API_BASE}/chat`, {
+  return request('/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ session_id: sessionId, question }),
   })
-  if (!res.ok) throw new Error((await res.json()).detail || 'Chat failed')
-  return res.json()
 }
 
 export async function getSession(sessionId) {
-  const res = await fetch(`${API_BASE}/session/${sessionId}`)
-  if (!res.ok) throw new Error('Failed to fetch session')
-  return res.json()
+  return request(`/session/${sessionId}`)
 }
 
 export async function resetSession(sessionId) {
-  const res = await fetch(`${API_BASE}/session/${sessionId}/reset`, { method: 'POST' })
-  if (!res.ok) throw new Error('Failed to reset')
-  return res.json()
+  return request(`/session/${sessionId}/reset`, { method: 'POST' })
 }
