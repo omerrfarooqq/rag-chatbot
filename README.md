@@ -53,7 +53,7 @@ Open **http://localhost:5173**.
 1. Click **Upload** and select one or more PDF / DOCX / TXT files.
 2. Wait for the file list to appear in the sidebar.
 3. Type a question and press **Send**.
-4. Ask follow-ups — the chatbot remembers the conversation.
+4. Ask follow-ups the chatbot remembers the conversation.
 5. **Reset session** clears uploaded docs and chat history.
 
 ## API
@@ -98,5 +98,5 @@ rag-chatbot/
 ## Notes
 
 - Session ID is generated in the browser and stored in `localStorage`.
-- All state is in memory — restarting the backend clears everything.
+- All state is in memory restarting the backend clears everything.
 - Only `.pdf`, `.docx`, `.txt` are accepted.
